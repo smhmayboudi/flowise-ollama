@@ -1,0 +1,80 @@
+version: '3.1'
+
+services:
+  flowise:
+    # platform: linux/arm64
+    image: flowiseai/flowise:1.6.4
+    restart: always
+    environment:
+      # - APIKEY_PATH=${APIKEY_PATH}
+      # - BLOB_STORAGE_PATH=${BLOB_STORAGE_PATH}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      # - DATABASE_HOST=${DATABASE_HOST}
+      # - DATABASE_NAME=${DATABASE_NAME}
+      # - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      # - DATABASE_PATH=${DATABASE_PATH}
+      # - DATABASE_PORT=${DATABASE_PORT}
+      # - DATABASE_SSL=${DATABASE_SSL}
+      # - DATABASE_SSL_KEY_BASE64=${DATABASE_SSL_KEY_BASE64}
+      # - DATABASE_TYPE=${DATABASE_TYPE}
+      # - DATABASE_USER=${DATABASE_USER}
+      - DEBUG=${DEBUG:-true}
+      # - DISABLE_FLOWISE_TELEMETRY=${DISABLE_FLOWISE_TELEMETRY}
+      # - FLOWISE_FILE_SIZE_LIMIT=${FLOWISE_FILE_SIZE_LIMIT}
+      # - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
+      # - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE}
+      # - FLOWISE_USERNAME=${FLOWISE_USERNAME}
+      - IFRAME_ORIGINS=${IFRAME_ORIGINS:-*}
+      - LOG_LEVEL=${LOG_LEVEL:-verbose}
+      # - LOG_PATH=${LOG_PATH}
+      - PORT=${PORT:-3000}
+      # - SECRETKEY_PATH=${SECRETKEY_PATH}
+    ports:
+      - '${PORT:-3000}:${PORT:-3000}'
+    # volumes:
+    #   - ~/.flowise:/Users/smhmayboudi/.flowise
+    command: /bin/sh -c "sleep 3; flowise start"
+    networks:
+      - ollama-docker
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  ollama:
+    # platform: linux/arm64
+    image: ollama/ollama:0.1.30
+    ports:
+      - 11434:11434
+    volumes:
+      # - .:/code
+      # - ./ollama/ollama:/Users/smhmayboudi/.ollama
+      - /Users/smhmayboudi/.ollama/models:/root/.ollama/models:ro
+    container_name: ollama
+    # pull_policy: always
+    tty: true
+    restart: always
+    networks:
+      - ollama-docker
+    # extra_hosts:
+    #   - host.docker.internal:host-gateway
+
+  ollama-webui:
+    # platform: linux/arm64
+    image: ghcr.io/ollama-webui/ollama-webui:main
+    container_name: ollama-webui
+    volumes:
+      - ./ollama/ollama-webui:/app/backend/data
+    depends_on:
+      - ollama
+    ports:
+      - 8080:8080
+    environment:
+      - '/ollama/api=http://ollama:11434/api'
+    restart: unless-stopped
+    networks:
+      - ollama-docker
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+networks:
+  ollama-docker:
+    external: false
