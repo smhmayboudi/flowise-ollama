@@ -3,7 +3,7 @@ version: '3.1'
 services:
   flowise:
     # platform: linux/arm64
-    image: flowiseai/flowise:1.6.4
+    image: flowiseai/flowise:1.6.5
     restart: always
     environment:
       # - APIKEY_PATH=${APIKEY_PATH}
@@ -41,7 +41,7 @@ services:
 
   ollama:
     # platform: linux/arm64
-    image: ollama/ollama:0.1.30
+    image: ollama/ollama:0.1.32
     ports:
       - 11434:11434
     volumes:
